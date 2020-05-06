@@ -99,6 +99,7 @@ class BeamSearchDecoder(object):
       best_hyp = beam_search.run_beam_search(self._sess, self._model, self._vocab, batch)
 
       # Extract the output ids from the hypothesis and convert back to words
+      decoded_output = []
       for bh in best_hyp:
         output_ids = [int(t) for t in bh.tokens[1:]]
         decoded_words = data.outputids2words(output_ids, self._vocab, (batch.art_oovs[0] if FLAGS.pointer_gen else None))
@@ -109,15 +110,14 @@ class BeamSearchDecoder(object):
           decoded_words = decoded_words[:fst_stop_idx]
         except ValueError:
           decoded_words = decoded_words
-        decoded_output = ' '.join(decoded_words) # single string
+        decoded_output.append(' '.join(decoded_words)) # single string
 
-        if FLAGS.single_pass:
-          self.write_for_rouge(original_abstract_sents, decoded_words, counter) # write ref summary and decoded summary to file, to eval with pyrouge later
-          counter += 1 # this is how many examples we've decoded
-        else:
-          print_results(article_withunks, abstract_withunks, decoded_output) # log output to screen
-          print_results(article_withunks, abstract_withunks, decoded_output) # log output to screen
-          self.write_for_attnvis(article_withunks, abstract_withunks, decoded_words, bh.attn_dists, bh.p_gens) # write info to .json file for visualization tool
+      if FLAGS.single_pass:
+        self.write_for_rouge(original_abstract_sents, decoded_words, counter) # write ref summary and decoded summary to file, to eval with pyrouge later
+        counter += 1 # this is how many examples we've decoded
+      else:
+        print_results(article_withunks, abstract_withunks, decoded_output) # log output to screen
+        self.write_for_attnvis(article_withunks, abstract_withunks, decoded_words, bh.attn_dists, bh.p_gens) # write info to .json file for visualization tool
 
       # Check if SECS_UNTIL_NEW_CKPT has elapsed; if so return so we can load a new checkpoint
       t1 = time.time()
@@ -196,7 +196,8 @@ def print_results(article, abstract, decoded_output):
   print("---------------------------------------------------------------------------")
   tf.logging.info('ARTICLE:  %s', article)
   tf.logging.info('REFERENCE SUMMARY: %s', abstract)
-  tf.logging.info('GENERATED SUMMARY: %s', decoded_output)
+  for do in decoded_output:
+    tf.logging.info('GENERATED SUMMARY: %s', do)
   print("---------------------------------------------------------------------------")
 
 
