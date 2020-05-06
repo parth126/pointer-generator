@@ -116,6 +116,7 @@ class BeamSearchDecoder(object):
           counter += 1 # this is how many examples we've decoded
         else:
           print_results(article_withunks, abstract_withunks, decoded_output) # log output to screen
+          print_results(article_withunks, abstract_withunks, decoded_output) # log output to screen
           self.write_for_attnvis(article_withunks, abstract_withunks, decoded_words, bh.attn_dists, bh.p_gens) # write info to .json file for visualization tool
 
       # Check if SECS_UNTIL_NEW_CKPT has elapsed; if so return so we can load a new checkpoint
