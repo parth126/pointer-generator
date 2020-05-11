@@ -73,7 +73,6 @@ class BeamSearchDecoder(object):
       self._rouge_dec_dir = os.path.join(self._decode_dir, "decoded")
       if not os.path.exists(self._rouge_dec_dir): os.mkdir(self._rouge_dec_dir)
 
-
   def decode(self):
     """Decode examples until data is exhausted (if FLAGS.single_pass) and return, or decode indefinitely, loading latest checkpoint at regular intervals"""
     t0 = time.time()
@@ -131,7 +130,7 @@ class BeamSearchDecoder(object):
         _ = util.load_ckpt(self._saver, self._sess)
         t0 = time.time()
 
-  def write_for_rouge(self, reference_sents, decoded_words, ex_index):
+  def write_for_rouge(self, reference_sents, all_decoded_words, ex_index):
     """Write output to file in correct format for eval with pyrouge. This is called in single_pass mode.
 
     Args:
@@ -140,31 +139,41 @@ class BeamSearchDecoder(object):
       ex_index: int, the index with which to label the files
     """
     # First, divide decoded output into sentences
-    decoded_sents = []
-    while len(decoded_words) > 0:
-      try:
-        fst_period_idx = decoded_words.index(".")
-      except ValueError: # there is text remaining that doesn't end in "."
-        fst_period_idx = len(decoded_words)
-      sent = decoded_words[:fst_period_idx+1] # sentence up to and including the period
-      decoded_words = decoded_words[fst_period_idx+1:] # everything else
-      decoded_sents.append(' '.join(sent))
+    count_proc = 0
+    for decoded_words in all_decoded_words:
+        decoded_sents = []
+        while len(decoded_words) > 0:
+          try:
+            fst_period_idx = decoded_words.index(".")
+          except ValueError: # there is text remaining that doesn't end in "."
+            fst_period_idx = len(decoded_words)
+          sent = decoded_words[:fst_period_idx+1] # sentence up to and including the period
+          decoded_words = decoded_words[fst_period_idx+1:] # everything else
+          decoded_sents.append(' '.join(sent))
 
-    # pyrouge calls a perl script that puts the data into HTML files.
-    # Therefore we need to make our output HTML safe.
-    decoded_sents = [make_html_safe(w) for w in decoded_sents]
-    reference_sents = [make_html_safe(w) for w in reference_sents]
+        # pyrouge calls a perl script that puts the data into HTML files.
+        # Therefore we need to make our output HTML safe.
+        decoded_sents = [make_html_safe(w) for w in decoded_sents]
+        reference_sents = [make_html_safe(w) for w in reference_sents]
 
-    # Write to file
-    ref_file = os.path.join(self._rouge_ref_dir, "%06d_reference.txt" % ex_index)
-    decoded_file = os.path.join(self._rouge_dec_dir, "%06d_decoded.txt" % ex_index)
+        # Write to file
+        ref_file = os.path.join(self._rouge_ref_dir, "%06d_reference.txt" % ex_index)
+        decoded_file = os.path.join(self._rouge_dec_dir, "%06d_decoded.txt" % ex_index)
 
-    with open(ref_file, "w") as f:
-      for idx,sent in enumerate(reference_sents):
-        f.write(sent) if idx==len(reference_sents)-1 else f.write(sent+"\n")
-    with open(decoded_file, "w") as f:
-      for idx,sent in enumerate(decoded_sents):
-        f.write(sent) if idx==len(decoded_sents)-1 else f.write(sent+"\n")
+        if count_proc == 0:
+            with open(ref_file, "w") as f:
+              for idx,sent in enumerate(reference_sents):
+                f.write(sent) if idx==len(reference_sents)-1 else f.write(sent+"\n")
+            with open(decoded_file, "w") as f:
+              for idx,sent in enumerate(decoded_sents):
+                f.write(sent) if idx==len(decoded_sents)-1 else f.write(sent+"\n")
+        else:
+            with open(decoded_file, "a") as f:
+              f.write("\n"+"------------------------------------------------------------")
+              for idx,sent in enumerate(decoded_sents):
+                f.write(sent) if idx==len(decoded_sents)-1 else f.write(sent+"\n")
+
+        count_proc += 1
 
     tf.logging.info("Wrote example %i to file" % ex_index)
 
