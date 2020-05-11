@@ -100,7 +100,10 @@ class BeamSearchDecoder(object):
       # Extract the output ids from the hypothesis and convert back to words
       decoded_output = []
       all_decoded_words = []
+      all_log_probs = []
+
       for bh in best_hyp:
+        output_log_prob = bh.avg_log_prob
         output_ids = [int(t) for t in bh.tokens[1:]]
         decoded_words = data.outputids2words(output_ids, self._vocab, (batch.art_oovs[0] if FLAGS.pointer_gen else None))
 
@@ -113,9 +116,10 @@ class BeamSearchDecoder(object):
           decoded_words = decoded_words
           all_decoded_words.append(decoded_words)
         decoded_output.append(' '.join(decoded_words)) # single string
+        all_log_probs.append(output_log_prob)
 
       if FLAGS.single_pass:
-        self.write_for_rouge(original_abstract_sents, all_decoded_words, counter) # write ref summary and decoded summary to file, to eval with pyrouge later
+        self.write_for_rouge(original_abstract_sents, all_decoded_words, all_log_probs, counter) # write ref summary and decoded summary to file, to eval with pyrouge later
         counter += 1 # this is how many examples we've decoded
         self.write_for_attnvis(article_withunks, abstract_withunks, all_decoded_words[0], bh.attn_dists, bh.p_gens) # write info to .json file for visualization tool
       else:
@@ -129,7 +133,7 @@ class BeamSearchDecoder(object):
         _ = util.load_ckpt(self._saver, self._sess)
         t0 = time.time()
 
-  def write_for_rouge(self, reference_sents, all_decoded_words, ex_index):
+  def write_for_rouge(self, reference_sents, all_decoded_words, all_log_probs, ex_index):
     """Write output to file in correct format for eval with pyrouge. This is called in single_pass mode.
 
     Args:
@@ -168,9 +172,9 @@ class BeamSearchDecoder(object):
                 f.write(sent) if idx==len(decoded_sents)-1 else f.write(sent+"\n")
         else:
             with open(decoded_file, "a") as f:
-              f.write("\n"+"------------------------------------------------------------")
+              f.write("\n"+"------------------------------------------------------------"+"\n")
               for idx,sent in enumerate(decoded_sents):
-                f.write(sent) if idx==len(decoded_sents)-1 else f.write(sent+"\n")
+                f.write(sent + "\n" + "log prob: {}".format(all_log_probs[count_proc])) if idx==len(decoded_sents)-1 else f.write(sent+"\n")
 
         count_proc += 1
 
