@@ -115,8 +115,7 @@ class BeamSearchDecoder(object):
         decoded_output.append(' '.join(decoded_words)) # single string
 
       if FLAGS.single_pass:
-        for dw in all_decoded_words:
-          self.write_for_rouge(original_abstract_sents, dw, counter) # write ref summary and decoded summary to file, to eval with pyrouge later
+        self.write_for_rouge(original_abstract_sents, all_decoded_words, counter) # write ref summary and decoded summary to file, to eval with pyrouge later
         counter += 1 # this is how many examples we've decoded
         self.write_for_attnvis(article_withunks, abstract_withunks, all_decoded_words[0], bh.attn_dists, bh.p_gens) # write info to .json file for visualization tool
       else:
