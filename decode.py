@@ -169,7 +169,7 @@ class BeamSearchDecoder(object):
                 f.write(sent) if idx==len(reference_sents)-1 else f.write(sent+"\n")
             with open(decoded_file, "w") as f:
               for idx,sent in enumerate(decoded_sents):
-                f.write(sent) if idx==len(decoded_sents)-1 else f.write(sent+"\n")
+                f.write(sent + "\n" + "log prob: {}".format(all_log_probs[count_proc])) if idx==len(decoded_sents)-1 else f.write(sent+"\n")
         else:
             with open(decoded_file, "a") as f:
               f.write("\n"+"------------------------------------------------------------"+"\n")
