@@ -100,6 +100,7 @@ class BeamSearchDecoder(object):
 
       # Extract the output ids from the hypothesis and convert back to words
       decoded_output = []
+      all_decoded_words = []
       for bh in best_hyp:
         output_ids = [int(t) for t in bh.tokens[1:]]
         decoded_words = data.outputids2words(output_ids, self._vocab, (batch.art_oovs[0] if FLAGS.pointer_gen else None))
@@ -108,13 +109,17 @@ class BeamSearchDecoder(object):
         try:
           fst_stop_idx = decoded_words.index(data.STOP_DECODING) # index of the (first) [STOP] symbol
           decoded_words = decoded_words[:fst_stop_idx]
+          all_decoded_words.append(decoded_words)
         except ValueError:
           decoded_words = decoded_words
+          all_decoded_words.append(decoded_words)
         decoded_output.append(' '.join(decoded_words)) # single string
 
       if FLAGS.single_pass:
-        self.write_for_rouge(original_abstract_sents, decoded_words, counter) # write ref summary and decoded summary to file, to eval with pyrouge later
+        for dw in all_decoded_words:
+          self.write_for_rouge(original_abstract_sents, dw, counter) # write ref summary and decoded summary to file, to eval with pyrouge later
         counter += 1 # this is how many examples we've decoded
+        self.write_for_attnvis(article_withunks, abstract_withunks, all_decoded_words[0], bh.attn_dists, bh.p_gens) # write info to .json file for visualization tool
       else:
         print_results(article_withunks, abstract_withunks, decoded_output) # log output to screen
         self.write_for_attnvis(article_withunks, abstract_withunks, decoded_words, bh.attn_dists, bh.p_gens) # write info to .json file for visualization tool
