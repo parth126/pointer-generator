@@ -42,7 +42,7 @@ for i in $base_dir/experiments/temp/$model_name/decode/reference/*;
 do
 	j=$(echo $i | rev | cut -d '/' -f 1 | rev | cut -d '_' -f 1);
 	target=$(cat $i | sed 's/ //g' | cut -d '.' -f 1);
-	cat $base_dir'/models/'$model_name'/decode/decoded/'$j'_decoded.txt' | sed -zE 's/[[:space:]]([,.?!])/\1/g' > $out_dir/text/$target'_'$enc_step'_'$dec_step.txt
+	cat $base_dir'/experiments/temp/'$model_name'/decode/decoded/'$j'_decoded.txt' | sed -zE 's/[[:space:]]([,.?!])/\1/g' > $out_dir/text/$target'_'$enc_step'_'$dec_step.txt
 	mv $base_dir'/experiments/temp/'$model_name'/decode/attention/'$j'_attn_vis_data.json' $out_dir/attention_scores/$target'_'$enc_step'_'$dec_step'.attn_vis_data.json'
 done
 echo "Summarization Successfully completed"
