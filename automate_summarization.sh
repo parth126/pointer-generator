@@ -27,6 +27,7 @@ export CLASSPATH=$base_dir/stanford-corenlp-full-2018-10-05/stanford-corenlp-3.9
 
 if [[ -d $in_path ]]
 then
+    echo "Input path is a dir"
     in_type="dir"
 else
     in_type="file"
@@ -34,6 +35,7 @@ fi
 
 if [[ -d $out_path ]]
 then
+    echo "Output path is a dir"	
     out_type="dir"
 else
     out_type="file"
