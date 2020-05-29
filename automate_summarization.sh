@@ -30,13 +30,13 @@ python $base_dir/automate_preprocessing.py $in_dir
 
 mkdir $base_dir/experiments/temp/$model_name
 
-python $base_dir/run_summarization.py --mode=decode --data_path=$base_dir/experiments/temp/finished_files/chunked/test_* --vocab_path=$base_dir/models/$vocab_name --log_root=$base_dir/experiments/temp --exp_name=$model_name --max_enc_steps=$enc_step --max_dec_steps=$dec_step --coverage=1 --single_pass=1
+python $base_dir/run_summarization.py --mode=decode --data_path=$base_dir/experiments/temp/finished_files/chunked/test_* --vocab_path=$base_dir/models/$vocab_name --log_root=$base_dir/models --exp_name=$model_name --max_enc_steps=$enc_step --max_dec_steps=$dec_step --coverage=1 --single_pass=1
 
 mkdir -p $out_dir/text
 
 mkdir -p $out_dir/attention_scores
 
-mv $base_dir/experiments/temp/$model_name/decode* $base_dir/experiments/temp/$model_name/decode
+mv $base_dir/models/$model_name/decode* $base_dir/experiments/temp/$model_name/decode
 
 for i in $base_dir/experiments/temp/$model_name/decode/reference/*;
 do
