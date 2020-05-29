@@ -21,15 +21,15 @@ base_dir=$(echo $base_dir | sed 's/\/$//g')
 model_name='summary-model'
 export CLASSPATH=$base_dir/stanford-corenlp-full-2018-10-05/stanford-corenlp-3.9.2.jar
 
-# Remove the decoded folder
-#rm -r $base_dir/experiments/temp/pretrained/decode*
 
 # Remove the temp folder (sentence_per_line, transcripts_tokenized, finished_files)
 rm -r $base_dir/experiments/temp
 
 python $base_dir/automate_preprocessing.py $in_dir
 
-python $base_dir/run_summarization.py --mode=decode --data_path=$base_dir/experiments/temp/finished_files/chunked/test_* --vocab_path=$base_dir/dataset/processed/finished_files/vocab --log_root=$base_dir/experiments/temp --exp_name=pretrained --max_enc_steps=$enc_step --max_dec_steps=$dec_step --coverage=1 --single_pass=1
+mkdir $base_dir/experiments/temp/$model_name
+
+python $base_dir/run_summarization.py --mode=decode --data_path=$base_dir/experiments/temp/finished_files/chunked/test_* --vocab_path=$base_dir/dataset/processed/finished_files/vocab --log_root=$base_dir/experiments/temp --exp_name=$model_name --max_enc_steps=$enc_step --max_dec_steps=$dec_step --coverage=1 --single_pass=1
 
 mkdir -p $out_dir/text
 
