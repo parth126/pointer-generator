@@ -72,7 +72,8 @@ class BeamSearchDecoder(object):
       if not os.path.exists(self._rouge_ref_dir): os.mkdir(self._rouge_ref_dir)
       self._rouge_dec_dir = os.path.join(self._decode_dir, "decoded")
       if not os.path.exists(self._rouge_dec_dir): os.mkdir(self._rouge_dec_dir)
-
+      self._rouge_attn_dir = os.path.join(self._decode_dir, "attention")
+      if not os.path.exists(self._rouge_attn_dir): os.mkdir(self._rouge_attn_dir)
 
   def decode(self):
     """Decode examples until data is exhausted (if FLAGS.single_pass) and return, or decode indefinitely, loading latest checkpoint at regular intervals"""
@@ -83,9 +84,9 @@ class BeamSearchDecoder(object):
       if batch is None: # finished decoding dataset in single_pass mode
         assert FLAGS.single_pass, "Dataset exhausted, but we are not in single_pass mode"
         tf.logging.info("Decoder has finished reading dataset for single_pass.")
-        tf.logging.info("Output has been saved in %s and %s. Now starting ROUGE eval...", self._rouge_ref_dir, self._rouge_dec_dir)
-        results_dict = rouge_eval(self._rouge_ref_dir, self._rouge_dec_dir)
-        rouge_log(results_dict, self._decode_dir)
+        #tf.logging.info("Output has been saved in %s and %s. Now starting ROUGE eval...", self._rouge_ref_dir, self._rouge_dec_dir)
+        #results_dict = rouge_eval(self._rouge_ref_dir, self._rouge_dec_dir)
+        #rouge_log(results_dict, self._decode_dir)
         return
 
       original_article = batch.original_articles[0]  # string
@@ -112,6 +113,7 @@ class BeamSearchDecoder(object):
 
       if FLAGS.single_pass:
         self.write_for_rouge(original_abstract_sents, decoded_words, counter) # write ref summary and decoded summary to file, to eval with pyrouge later
+        self.write_for_attnvis(article_withunks, abstract_withunks, decoded_words, best_hyp.attn_dists, best_hyp.p_gens, counter)
         counter += 1 # this is how many examples we've decoded
       else:
         print_results(article_withunks, abstract_withunks, decoded_output) # log output to screen
@@ -162,7 +164,7 @@ class BeamSearchDecoder(object):
     tf.logging.info("Wrote example %i to file" % ex_index)
 
 
-  def write_for_attnvis(self, article, abstract, decoded_words, attn_dists, p_gens):
+  def write_for_attnvis(self, article, abstract, decoded_words, attn_dists, p_gens, ex_index):
     """Write some data to json file, which can be read into the in-browser attention visualizer tool:
       https://github.com/abisee/attn_vis
 
@@ -183,7 +185,7 @@ class BeamSearchDecoder(object):
     }
     if FLAGS.pointer_gen:
       to_write['p_gens'] = p_gens
-    output_fname = os.path.join(self._decode_dir, 'attn_vis_data.json')
+    output_fname = os.path.join(self._rouge_attn_dir, '%06d_attn_vis_data.json' % ex_index)
     with open(output_fname, 'w') as output_file:
       json.dump(to_write, output_file)
     tf.logging.info('Wrote visualization data to %s', output_fname)
