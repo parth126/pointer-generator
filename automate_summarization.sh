@@ -17,8 +17,8 @@ while getopts ":i:o:p:e:d:" opt; do
   esac
 done
 
-in_path=$(echo $in_dir | sed 's/\/$//g')
-out_path=$(echo $out_dir | sed 's/\/$//g')
+in_path=$(echo $in_path | sed 's/\/$//g')
+out_path=$(echo $out_path | sed 's/\/$//g')
 base_dir=$(echo $base_dir | sed 's/\/$//g')
 model_name='summary-model'
 vocab_name='summary-vocab'
@@ -30,14 +30,16 @@ then
     echo "Input path is a dir"
     in_type="dir"
 else
+    echo "Input path is a file"
     in_type="file"
 fi
 
 if [[ -d $out_path ]]
 then
-    echo "Output path is a dir"	
+    echo "Output path is a dir"
     out_type="dir"
 else
+    echo "Output path is a file"
     out_type="file"
 fi
 
