@@ -35,9 +35,9 @@ mkdir -p $out_dir/text
 
 mkdir -p $out_dir/attention_scores
 
-mv $base_dir/experiments/temp/pretrained/decode* $base_dir/experiments/temp/pretrained/decode
+mv $base_dir/experiments/temp/$model_name/decode* $base_dir/experiments/temp/$model_name/decode
 
-for i in $base_dir/experiments/temp/pretrained/decode/reference/*;
+for i in $base_dir/experiments/temp/$model_name/decode/reference/*;
 do
 	j=$(echo $i | rev | cut -d '/' -f 1 | rev | cut -d '_' -f 1);
 	target=$(cat $i | sed 's/ //g' | cut -d '.' -f 1);
