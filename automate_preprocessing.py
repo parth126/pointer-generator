@@ -197,11 +197,13 @@ if __name__ == '__main__':
     print("USAGE: python make_datafiles.py <transcript_text_dir>")
     sys.exit()
   transcript_text_dir = sys.argv[1]
-  #print("ppp: ", transcript_text_dir)  
-  transcript_tokenized_dir =  '/'.join(transcript_text_dir.split('/')[0:-1])+'/transcripts_tokenized'
-  finished_files_dir = '/'.join(transcript_text_dir.split('/')[0:-1])+"/finished_files"
-  sentence_per_line_dir = '/'.join(transcript_text_dir.split('/')[0:-1])+"/sentence_per_line_dir"
+  #print("ppp: ", transcript_text_dir)
+  transcript_tokenized_dir =  '/'.join(transcript_text_dir.split('/')[0:-1])+'/temp/transcripts_tokenized'
+  finished_files_dir = '/'.join(transcript_text_dir.split('/')[0:-1])+"/temp/finished_files"
+  sentence_per_line_dir = '/'.join(transcript_text_dir.split('/')[0:-1])+"/temp/sentence_per_line_dir"
   chunks_dir = os.path.join(finished_files_dir, "chunked")
+
+  print(transcript_text_dir, finished_files_dir, sentence_per_line_dir, chunks_dir)
 
   # Create some new directories
   if not os.path.exists(sentence_per_line_dir): os.makedirs(sentence_per_line_dir)
