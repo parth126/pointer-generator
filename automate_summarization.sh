@@ -1,8 +1,10 @@
+#!/bin/bash
+
 while getopts ":i:o:p:e:d:" opt; do
   case $opt in
-    i) in_dir="$OPTARG"
+    i) in_path="$OPTARG"
     ;;
-    o) out_dir="$OPTARG"
+    o) out_path="$OPTARG"
     ;;
     p) base_dir="$OPTARG"
     ;;
@@ -15,16 +17,49 @@ while getopts ":i:o:p:e:d:" opt; do
   esac
 done
 
-in_dir=$(echo $in_dir | sed 's/\/$//g')
-out_dir=$(echo $out_dir | sed 's/\/$//g')
+in_path=$(echo $in_dir | sed 's/\/$//g')
+out_path=$(echo $out_dir | sed 's/\/$//g')
 base_dir=$(echo $base_dir | sed 's/\/$//g')
 model_name='summary-model'
 vocab_name='summary-vocab'
 export CLASSPATH=$base_dir/stanford-corenlp-full-2018-10-05/stanford-corenlp-3.9.2.jar
 
 
+if [[ -d $in_path ]]
+then
+    in_type="dir"
+else
+    in_type="file"
+fi
+
+if [[ -d $out_path ]]
+then
+    out_type="dir"
+else
+    out_type="file"
+fi
+
+if [[ $in_type != $out_type ]]
+then
+echo "Input and output types should be similar (file/directory). Exiting with error"
+exit 1
+fi
+
 # Remove the temp folder (sentence_per_line, transcripts_tokenized, finished_files)
 rm -r $base_dir/experiments/temp
+
+if [[ $in_type == "file" ]]
+then
+    mkdir $base_dir/experiments/temp
+    mkdir $base_dir/experiments/temp/in_dir
+    mkdir $base_dir/experiments/temp/out_dir
+    in_dir=$(echo $base_dir/experiments/temp/in_dir)
+    out_dir=$(echo $base_dir/experiments/temp/out_dir)
+    cp $in_path $in_dir/
+else
+    in_dir=$(echo $in_path)
+    out_dir=$(echo $out_path)
+fi
 
 python $base_dir/automate_preprocessing.py $in_dir
 
