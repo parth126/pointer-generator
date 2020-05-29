@@ -84,4 +84,9 @@ do
 	cat $base_dir'/experiments/temp/'$model_name'/decode/decoded/'$j'_decoded.txt' | sed -zE 's/[[:space:]]([,.?!])/\1/g' > $out_dir/text/$target'_'$enc_step'_'$dec_step.txt
 	mv $base_dir'/experiments/temp/'$model_name'/decode/attention/'$j'_attn_vis_data.json' $out_dir/attention_scores/$target'_'$enc_step'_'$dec_step'.attn_vis_data.json'
 done
+
+if [[ $out_type == "file" ]]
+then
+mv $out_dir/text/* $out_path
+fi
 echo "Summarization Successfully completed"
