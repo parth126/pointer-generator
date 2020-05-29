@@ -193,14 +193,15 @@ def create_sent_per_line(transcript_text_dir, sentence_per_line_dir):
             f.write(text)
 
 if __name__ == '__main__':
-  if len(sys.argv) != 2:
-    print("USAGE: python make_datafiles.py <transcript_text_dir>")
+  if len(sys.argv) != 3:
+    print("USAGE: python make_datafiles.py <transcript_text_dir> <temp files directory>")
     sys.exit()
   transcript_text_dir = sys.argv[1]
+  temp_dir = sys.argv[2]
   #print("ppp: ", transcript_text_dir)
-  transcript_tokenized_dir =  '/'.join(transcript_text_dir.split('/')[0:-1])+'/temp/transcripts_tokenized'
-  finished_files_dir = '/'.join(transcript_text_dir.split('/')[0:-1])+"/temp/finished_files"
-  sentence_per_line_dir = '/'.join(transcript_text_dir.split('/')[0:-1])+"/temp/sentence_per_line_dir"
+  transcript_tokenized_dir =  temp_dir+'/transcripts_tokenized'
+  finished_files_dir = temp_dir+"/finished_files"
+  sentence_per_line_dir = temp_dir+"/sentence_per_line_dir"
   chunks_dir = os.path.join(finished_files_dir, "chunked")
 
   print(transcript_text_dir, finished_files_dir, sentence_per_line_dir, chunks_dir)

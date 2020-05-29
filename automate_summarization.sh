@@ -65,7 +65,7 @@ else
     out_dir=$(echo $out_path)
 fi
 
-python $base_dir/automate_preprocessing.py $in_dir
+python $base_dir/automate_preprocessing.py $in_dir $base_dir/experiments/temp
 
 mkdir $base_dir/experiments/temp/$model_name
 
