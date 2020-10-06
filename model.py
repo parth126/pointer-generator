@@ -289,7 +289,13 @@ class SummarizationModel(object):
     """Sets self._train_op, the op to run for training."""
     # Take gradients of the trainable variables w.r.t. the loss function to minimize
     loss_to_minimize = self._total_loss if self._hps.coverage else self._loss
-    tvars = tf.trainable_variables()
+    if FLAGS.tl:
+      tvars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "seq2seq/decoder/attention_decoder") \
+               + tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "seq2seq/output_projection") \
+               + tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "seq2seq/reduce_final_st")
+    else:
+      tvars = tf.trainable_variables()
+    print(tvars)
     gradients = tf.gradients(loss_to_minimize, tvars, aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
 
     # Clip the gradients
